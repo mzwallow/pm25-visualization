@@ -12,9 +12,11 @@
   "license": "ISC",
   "dependencies": {
     "@arcgis/core": "^4.23.7",
+    "dotenv": "^16.0.0",
     "ejs": "^3.0.2",
     "express": "^4.17.3",
     "mssql": "^8.1.0",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "xlsx": "file:vendor/xlsx-latest.tgz"
   }
 }
