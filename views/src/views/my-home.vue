@@ -2,6 +2,9 @@
   <v-container class="page">
       <v-card class="card">
           <v-card-title>ข้อ 4</v-card-title>
+          <div class="card-content">
+            <v-btn @click="get4a"> Tesxst </v-btn>
+          </div>
       </v-card>
       <v-card class="card">
           <v-card-title>ข้อ 4</v-card-title>
@@ -17,6 +20,22 @@ export default {
     data: () => ({
 
 	}),
+
+
+    methods: {
+        get4a(){
+            console.log('kuy')
+        },
+        get4b(){
+
+        },
+        get4c(){
+
+        },
+        get4d(){
+
+        },
+    },
 }
 </script>
 

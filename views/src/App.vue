@@ -1,10 +1,10 @@
 <template>
   <v-app>
     <v-app-bar
+      class="nav"
       app
       color="amber darken-4"
       dark
-      class="justify-content-center"
     > 
     <h2 class="logo">
       Spatial Database
@@ -22,14 +22,20 @@
 <style scoped>
   .logo{
     text-align: center;
+    margin-left: 2rem;
+  }
+  .nav{
+    justify-content: center;
   }
 </style>
 
 <script>
+
 export default {
   name: 'App',
   data: () => ({
     //
   }),
+
 };
 </script>

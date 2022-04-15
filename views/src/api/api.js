@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-	baseURL: "localhost:3000",
+	baseURL: "http://139.59.219.252:3000",
 });
 
 // instance.defaults.headers.common['SOMETHING'] = 'something'
