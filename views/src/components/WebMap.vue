@@ -1,5 +1,5 @@
 <template>
-  <div class="map-view">
+  <div id="viewDiv" class="map-view">
   </div>
 </template>
 
@@ -14,6 +14,8 @@
 <script>
   import arcGISMap from '@arcgis/core/WebMap';
   import MapView from '@arcgis/core/views/MapView'
+  import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer'
+  import Graphic from '@arcgis/core/Graphic'
 
   export default {
     name: 'WebMap',
@@ -33,8 +35,33 @@
 
       const view = new MapView({
         map,
-        container: this.$el
+        center: [-118.80500,34.02700],
+        zoom: 13,
+        container: 'viewDiv'
       });
+
+      const graphicsLayer = new GraphicsLayer();
+      map.add(graphicsLayer);
+
+      const point = { //Create a point
+          type: "point",
+          longitude: -118.80657463861,
+          latitude: 34.0005930608889
+      };
+      const simpleMarkerSymbol = {
+          type: "simple-marker",
+          color: [226, 119, 40],  // Orange
+          outline: {
+              color: [255, 255, 255], // White
+              width: 1
+          }
+      };
+      const pointGraphic = new Graphic({
+          geometry: point,
+          symbol: simpleMarkerSymbol
+      });
+
+      graphicsLayer.add(pointGraphic);
 
       view.when(() => {
         console.log('moo')
