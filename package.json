@@ -17,6 +17,6 @@
     "express": "^4.17.3",
     "mssql": "^8.1.0",
     "nodemon": "^2.0.15",
-    "xlsx": "file:vendor/xlsx-latest.tgz"
+    "xlsx": "^0.18.5"
   }
 }
