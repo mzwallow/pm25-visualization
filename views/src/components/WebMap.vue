@@ -15,7 +15,7 @@
 	position: relative;
 }
 canvas {
-  object-fit: cover;
+  /* object-fit: cover; */
 }
 </style>
 
@@ -33,12 +33,13 @@ export default {
 
 	props: ["msg", "name", "info"],
 
-	data: () => ({}),
+	data: () => ({
+
+	}),
 
 	computed: {
 		data() {
 			let map, view, graphicsLayer, simpleMarkerSymbol, pointGraphic;
-			// console.log(this.name,this.info)
 			if (!this.info) {
 				return;
 			}
@@ -47,86 +48,67 @@ export default {
 				basemap: "topo-vector",
 			});
 
-			
-
 			view = new MapView({
 				map,
-				// extent: {
-				// 	xmin: -118.98364392089809,
-				// 	ymin: 33.64236255586565,
-				// 	xmax: -117.5073560791019,
-				// 	ymax: 34.3638389963474,
-				// 	spatialReference: 4326,
-				// },
-				// extent: {
-				// 	xmin: -9177882,
-				// 	ymin: 4246761,
-				// 	xmax: -9176720,
-				// 	ymax: 4247967,
-				// 	spatialReference: new SpatialReference({
-				// 		wkid: 4326,
-				// 	}),
-				// },
 				spatialReference: SpatialReference.WebMercator,
 				container: this.name,
-				center: [this.info.point[0][0], this.info.point[0][1]],
+				center: this.info.point.length > 0 ? [this.info.point[0][0], this.info.point[0][1]] : null ,
 				zoom: 2,
 			});
-			graphicsLayer = new GraphicsLayer();
-			map.add(graphicsLayer);
+			if(this.info.point.length > 0){
+				graphicsLayer = new GraphicsLayer();
+				map.add(graphicsLayer);
+				
+				// this.info.point.forEach((item, index) => {
+				// 	let geom = new Point({
+				// 		x: item[0],
+				// 		y: item[1],
+				// 		type: "point",
+				// 		SpatialReference: SpatialReference.WGS84,
+				// 	})
+				// 	simpleMarkerSymbol = {
+				// 		type: "text",
+				// 		text: this.info.city[index],
+				// 		color: 'black', // Orange
+				// 		outline: {
+				// 			color: [255, 255, 255], // White
+				// 			width: 1,
+				// 		},
+				// 	};
+				// 	let newGeometry = geographicToWebMercator(geom);
+				// 	pointGraphic = new Graphic({
+				// 		geometry: newGeometry,
+				// 		symbol: simpleMarkerSymbol,
+				// 	});
+				// 	graphicsLayer.add(pointGraphic)
+				// });
 
-			
-			// this.info.point.forEach((item, index) => {
-			// 	let geom = new Point({
-			// 		x: item[0],
-			// 		y: item[1],
-			// 		type: "point",
-			// 		SpatialReference: SpatialReference.WGS84,
-			// 	})
-			// 	simpleMarkerSymbol = {
-			// 		type: "text",
-			// 		text: this.info.city[index],
-			// 		color: 'black', // Orange
-			// 		outline: {
-			// 			color: [255, 255, 255], // White
-			// 			width: 1,
-			// 		},
-			// 	};
-			// 	let newGeometry = geographicToWebMercator(geom);
-			// 	pointGraphic = new Graphic({
-			// 		geometry: newGeometry,
-			// 		symbol: simpleMarkerSymbol,
-			// 	});
-			// 	graphicsLayer.add(pointGraphic)
-			// });
+				simpleMarkerSymbol = {
+					type: "simple-marker",
+					color: [226, 119, 40], // Orange
+					outline: {
+						color: [255, 255, 255], // White
+						width: 1,
+					},
+				};
 
-			simpleMarkerSymbol = {
-				type: "simple-marker",
-				color: [226, 119, 40], // Orange
-				outline: {
-					color: [255, 255, 255], // White
-					width: 1,
-				},
-			};
+				let geometry = new Multipoint({
+					points: this.info.point,
+					type: "Multipoint",
+					SpatialReference: SpatialReference.WGS84,
+				});
 
-			let geometry = new Multipoint({
-				points: this.info.point,
-				type: "Multipoint",
-				SpatialReference: SpatialReference.WGS84,
-			});
-			
-			let newGeometry = geographicToWebMercator(geometry);
+				console.log(1,this.name, geometry)
+				let newGeometry = geographicToWebMercator(geometry);
+				console.log(2,this.name, newGeometry)
 
-			pointGraphic = new Graphic({
-				geometry: newGeometry,
-				symbol: simpleMarkerSymbol,
-			});
+				pointGraphic = new Graphic({
+					geometry: newGeometry,
+					symbol: simpleMarkerSymbol,
+				});
 
-			graphicsLayer.add(pointGraphic);
-
-			view.when(() => {
-				console.log("moo");
-			});
+				graphicsLayer.add(pointGraphic);
+			}
 
 			return null;
 		},

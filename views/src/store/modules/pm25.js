@@ -61,9 +61,6 @@ const actions = {
 				let point = res.data.map((item) => {
 					return [item.longtitude, item.latitude];
 				});
-				if (point.length === 0) {
-					point = [[0,0]];
-				}
 				let city = res.data.map(item => {
 					return item.city
 				})
@@ -81,9 +78,6 @@ const actions = {
 			let point = res.data.map((item) => {
 				return [item.longtitude, item.latitude];
 			});
-			if (point.length === 0) {
-				point = [[0,0]];
-			}
 			let city = res.data.map(item => {
 				return item.city
 			})
@@ -100,9 +94,6 @@ const actions = {
 			let point = res.data.map((item) => {
 				return [item.longtitude, item.latitude];
 			});
-			if (point.length === 0) {
-				point = [[0,0]];
-			}
 			let city = res.data.map(item => {
 				return item.city
 			})
@@ -119,11 +110,8 @@ const actions = {
 			.get(`/4-points-of-mbr-covering-city-points-in-thailand-in-2009`)
 			.then((res) => {
 				let point = res.data.map((item) => {
-					return [item.latitude, item.longtitude];
+					return [item.longtitude, item.latitude];
 				});
-				if (point.length === 0) {
-					point = [[0,0]];
-				}
 				let city = res.data.map(item => {
 					return item.city
 				})
@@ -132,7 +120,6 @@ const actions = {
 					point,
 					city
 				}
-
 				commit("set5d", data);
 			});
 	},
@@ -143,9 +130,6 @@ const actions = {
 				let point = res.data.map((item) => {
 					return [item.latitude, item.longtitude];
 				});
-				if (point.length === 0) {
-					point = [[0,0]];
-				}
 				let city = res.data.map(item => {
 					return item.city
 				})
@@ -163,9 +147,6 @@ const actions = {
 				let point = res.data.map((item) => {
 					return [item.latitude, item.longtitude];
 				});
-				if (point.length === 0) {
-					point = [[0,0]];
-				}
 				let city = res.data.map(item => {
 					return item.city
 				})

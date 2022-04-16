@@ -7,7 +7,7 @@
       dark
     > 
     <h2 class="logo">
-      Spatial Database
+      Spatial Database : Visualizing Air Pollution 
     </h2>
     </v-app-bar>
 
