@@ -27,6 +27,25 @@ const config = {
     }
 }
 
+/**
+ * TODO: Given an input path to the input excel file. The output of this step is two-folded:
+ * TODO: the successful insertion of data rows into the table as well as the log file reporting data rows failed to be inserted.
+*/
+// 2
+// 
+app.post('/upload-air-pollution', async (req, res) => {
+    sql.connect(config, (err) => {
+        if (err) {
+     	    return res.status(500).json({
+	        message: 'can not connect to database',
+		error: err.message
+	    });
+	}
+
+	new sql.Request().query(``);
+    });
+});
+
 // 4-A
 // List country and city names whose PM 2.5 values are greater than 50 in 2015
 app.get('/countries-PM25-gte-50-in-2015.xlsx', async (req, res) => {
@@ -34,7 +53,7 @@ app.get('/countries-PM25-gte-50-in-2015.xlsx', async (req, res) => {
         if (err) {
             return res.status(500).json({
                 message: 'can not connect to database',
-                error: err
+                error: err.message
             });
         }
 
@@ -319,8 +338,8 @@ app.get('/city-points-of-countries-having-highest-city-points-in-2011', async (r
         `, (err, result) => {
             if (err) {
                 return res.status(500).json({ error: err.message });
-            }
 
+            }
             res.json(result.recordset);            
         });
     })
