@@ -26,9 +26,30 @@
             <v-text-field v-model="year"></v-text-field>
           </div>
       </v-card>
+
       <v-card class="card">
-        <v-card-title>MAP</v-card-title>
-        <WebMap msg="96cf806c32874026bef5f586315f098c" />
+        <v-card-title>ข้อ 5a</v-card-title>
+        <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data1" name="5a" />
+      </v-card>
+      <v-card class="card">
+          <v-card-title>ข้อ 5b</v-card-title>
+        <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data2" name="5b"  />
+      </v-card> 
+      <v-card class="card"> 
+          <v-card-title>ข้อ 5c</v-card-title>
+        <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data3" name="5c"  />
+      </v-card> 
+      <v-card class="card"> 
+          <v-card-title>ข้อ 5d</v-card-title>
+        <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data4" name="5d"  />
+      </v-card> 
+      <v-card class="card"> 
+          <v-card-title>ข้อ 5e</v-card-title>
+        <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data5" name="5e"  />
+      </v-card> 
+      <v-card class="card"> 
+          <v-card-title>ข้อ 5f</v-card-title>
+        <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data6" name="5f"  />
       </v-card>
   </v-container>
 </template>
@@ -42,11 +63,42 @@ export default {
     },
 
     data: () => ({
-        country: '',
+        country: 'Italy',
         year: 2000,
 	}),
 
+    created(){
+        this.get5a()
+        this.get5b()
+        this.get5c()
+        this.get5d() 
+        this.get5e()
+        this.get5f()
+    },
+
+    computed: {
+        data1(){
+            return this.$store.getters.data5a
+        },
+        data2(){
+            return this.$store.getters.data5b
+        },
+        data3(){
+            return this.$store.getters.data5c
+        },
+        data4(){
+            return this.$store.getters.data5d
+        },
+        data5(){
+            return this.$store.getters.data5e
+        },
+        data6(){
+            return this.$store.getters.data5f
+        }
+    },
+
     methods: {
+        // 4a -> OnClick
         get4a(){
             this.$store.dispatch('get4a')
         },
@@ -58,6 +110,26 @@ export default {
             },
         get4d(){
             this.$store.dispatch('get4d', {year: this.year})
+        },
+
+        // Start Call 
+        get5a(){
+            this.$store.dispatch('get5a', {year: 2016})
+        },
+        get5b(){
+            this.$store.dispatch('get5b')
+        },
+        get5c(){
+            this.$store.dispatch('get5c')
+            },
+        get5d(){
+            this.$store.dispatch('get5d')
+        },
+        get5e(){
+            this.$store.dispatch('get5e')
+        },
+        get5f(){
+            this.$store.dispatch('get5f', {year: 2016})
         },
     },
 }

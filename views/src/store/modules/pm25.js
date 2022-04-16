@@ -1,12 +1,39 @@
+import axios from "../../api/api";
+
 // state data
 const state = {
-	products: [],
+	data5a: null,
+	data5b: null,
+	data5c: null,
+	data5d: null,
+	data5e: null,
+	data5f: null,
 };
 
 // mutate state
 const mutations = {
-	setProducts(state, products) {
-		state.products = products;
+	set5a(state, data) {
+		state.data5a = data;
+	},
+
+	set5b(state, data) {
+		state.data5b = data;
+	},
+
+	set5c(state, data) {
+		state.data5c = data;
+	},
+
+	set5d(state, data) {
+		state.data5d = data;
+	},
+
+	set5e(state, data) {
+		state.data5e = data;
+	},
+
+	set5f(state, data) {
+		state.data5f = data;
 	},
 };
 
@@ -14,62 +41,103 @@ const mutations = {
 const actions = {
 	// get assignemnt => GET
 	get4a() {
-		window.open(
-			"http://139.59.219.252:3000/countries-pm25-gte-50-in-2015.xlsx"
-		);
+		window.open("/countries-pm25-gte-50-in-2015.xlsx");
 	},
 	// add assignment => POST
 	get4b() {
-		window.open(
-			"http://139.59.219.252:3000/avg-pm25-by-countries-desc.xlsx"
-		);
+		window.open("/avg-pm25-by-countries-desc.xlsx");
 	},
 	get4c({}, payload) {
-		window.open(
-			`http://139.59.219.252:3000/${payload.country}/historical-pm25-by-year.xlsx`
-		);
+		window.open(`/${payload.country}/historical-pm25-by-year.xlsx`);
 	},
 	get4d({}, payload) {
-		window.open(
-			`http://139.59.219.252:3000/${payload.year}/:color/total-affected-populations.xlsx`
-		);
+		window.open(`/${payload.year}/:color/total-affected-populations.xlsx`);
 	},
 
-	get5a() {
-		window.open(
-			"http://139.59.219.252:3000/countries-pm25-gte-50-in-2015.xlsx"
-		);
+	get5a({ commit }, payload) {
+		axios
+			.get(`/city-points-of-all-countries/${payload.year}`)
+			.then((res) => {
+				let data = res.data.map((item) => {
+					return [item.latitude, item.longtitude];
+				});
+				commit("set5a", data);
+			});
 	},
 	// add assignment => POST
-	get5b() {
-		window.open(
-			"http://139.59.219.252:3000/avg-pm25-by-countries-desc.xlsx"
-		);
+	get5b({ commit }) {
+		axios.get(`/50-city-points-closest-to-bangkok`).then((res) => {
+			let data = res.data.map((item) => {
+				return [item.latitude, item.longtitude];
+			});
+			commit("set5b", data);
+		});
 	},
-	get5c({}, payload) {
-		window.open(
-			`http://139.59.219.252:3000/${payload.country}/historical-pm25-by-year.xlsx`
-		);
+	get5c({ commit }) {
+		axios.get(`/city-points-of-thailand-neighbors-in-2018`).then((res) => {
+			let data = res.data.map((item) => {
+				return [item.latitude, item.longtitude];
+			});
+			if (data.length === 0) {
+				data = [0, 0];
+			}
+			commit("set5c", data);
+		});
 	},
-	get5d({}, payload) {
-		window.open(
-			`http://139.59.219.252:3000/${payload.year}/:color/total-affected-populations.xlsx`
-		);
+
+	get5d({ commit }) {
+		axios
+			.get(`/4-points-of-mbr-covering-city-points-in-thailand-in-2009`)
+			.then((res) => {
+				let data = res.data.map((item) => {
+					return [item.latitude, item.longtitude];
+				});
+				commit("set5d", data);
+			});
 	},
-	get5d({}, payload) {
-		window.open(
-			`http://139.59.219.252:3000/${payload.year}/:color/total-affected-populations.xlsx`
-		);
+	get5e({ commit }) {
+		axios
+			.get(`/city-points-of-countries-having-highest-city-points-in-2011`)
+			.then((res) => {
+				let data = res.data.map((item) => {
+					return [item.latitude, item.longtitude];
+				});
+				commit("set5e", data);
+			});
 	},
-	get5d({}, payload) {
-		window.open(
-			`http://139.59.219.252:3000/${payload.year}/:color/total-affected-populations.xlsx`
-		);
+	get5f({ commit }, payload) {
+		axios
+			.get(`/city-points-have-low-income/${payload.year}`)
+			.then((res) => {
+				let data = res.data.map((item) => {
+					return [item.latitude, item.longtitude];
+				});
+				commit("set5f", data);
+			});
 	},
 };
 
 // getters return requested data
-const getters = {};
+const getters = {
+	data5a(state) {
+		return state.data5a;
+	},
+	data5b(state) {
+		return state.data5b;
+	},
+	data5c(state) {
+		return state.data5c;
+	},
+	data5d(state) {
+		return state.data5d;
+	},
+	data5e(state) {
+		return state.data5e;
+	},
+	data5f(state) {
+		return state.data5f;
+	},
+};
 
 export default {
 	state,
