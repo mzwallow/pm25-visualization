@@ -41,45 +41,74 @@ const mutations = {
 const actions = {
 	// get assignemnt => GET
 	get4a() {
-		window.open("/countries-pm25-gte-50-in-2015.xlsx");
+		window.open(`${axios.defaults.baseURL}/countries-pm25-gte-50-in-2015.xlsx`);
 	},
 	// add assignment => POST
 	get4b() {
-		window.open("/avg-pm25-by-countries-desc.xlsx");
+		window.open(`${axios.defaults.baseURL}/avg-pm25-by-countries-desc.xlsx`);
 	},
 	get4c({}, payload) {
-		window.open(`/${payload.country}/historical-pm25-by-year.xlsx`);
+		window.open(`${axios.defaults.baseURL}/${payload.country}/historical-pm25-by-year.xlsx`);
 	},
 	get4d({}, payload) {
-		window.open(`/${payload.year}/:color/total-affected-populations.xlsx`);
+		window.open(`${axios.defaults.baseURL}/${payload.year}/${payload.color}/total-affected-populations.xlsx`);
 	},
 
 	get5a({ commit }, payload) {
 		axios
 			.get(`/city-points-of-all-countries/${payload.year}`)
 			.then((res) => {
-				let data = res.data.map((item) => {
-					return [item.latitude, item.longtitude];
+				let point = res.data.map((item) => {
+					return [item.longtitude, item.latitude];
 				});
+				if (point.length === 0) {
+					point = [[0,0]];
+				}
+				let city = res.data.map(item => {
+					return item.city
+				})
+				let data = {
+					point,
+					city
+				}
+
 				commit("set5a", data);
 			});
 	},
 	// add assignment => POST
 	get5b({ commit }) {
 		axios.get(`/50-city-points-closest-to-bangkok`).then((res) => {
-			let data = res.data.map((item) => {
-				return [item.latitude, item.longtitude];
+			let point = res.data.map((item) => {
+				return [item.longtitude, item.latitude];
 			});
+			if (point.length === 0) {
+				point = [[0,0]];
+			}
+			let city = res.data.map(item => {
+				return item.city
+			})
+			let data = {
+				point,
+				city
+			}
+
 			commit("set5b", data);
 		});
 	},
 	get5c({ commit }) {
 		axios.get(`/city-points-of-thailand-neighbors-in-2018`).then((res) => {
-			let data = res.data.map((item) => {
-				return [item.latitude, item.longtitude];
+			let point = res.data.map((item) => {
+				return [item.longtitude, item.latitude];
 			});
-			if (data.length === 0) {
-				data = [0, 0];
+			if (point.length === 0) {
+				point = [[0,0]];
+			}
+			let city = res.data.map(item => {
+				return item.city
+			})
+			let data = {
+				point,
+				city
 			}
 			commit("set5c", data);
 		});
@@ -89,9 +118,21 @@ const actions = {
 		axios
 			.get(`/4-points-of-mbr-covering-city-points-in-thailand-in-2009`)
 			.then((res) => {
-				let data = res.data.map((item) => {
+				let point = res.data.map((item) => {
 					return [item.latitude, item.longtitude];
 				});
+				if (point.length === 0) {
+					point = [[0,0]];
+				}
+				let city = res.data.map(item => {
+					return item.city
+				})
+				
+				let data = {
+					point,
+					city
+				}
+
 				commit("set5d", data);
 			});
 	},
@@ -99,9 +140,19 @@ const actions = {
 		axios
 			.get(`/city-points-of-countries-having-highest-city-points-in-2011`)
 			.then((res) => {
-				let data = res.data.map((item) => {
+				let point = res.data.map((item) => {
 					return [item.latitude, item.longtitude];
 				});
+				if (point.length === 0) {
+					point = [[0,0]];
+				}
+				let city = res.data.map(item => {
+					return item.city
+				})
+				let data = {
+					point,
+					city
+				}
 				commit("set5e", data);
 			});
 	},
@@ -109,9 +160,19 @@ const actions = {
 		axios
 			.get(`/city-points-have-low-income/${payload.year}`)
 			.then((res) => {
-				let data = res.data.map((item) => {
+				let point = res.data.map((item) => {
 					return [item.latitude, item.longtitude];
 				});
+				if (point.length === 0) {
+					point = [[0,0]];
+				}
+				let city = res.data.map(item => {
+					return item.city
+				})
+				let data = {
+					point,
+					city
+				}
 				commit("set5f", data);
 			});
 	},

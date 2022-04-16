@@ -3,52 +3,66 @@
       <v-card class="card">
           <v-card-title>ข้อ 4 - a</v-card-title>
           <div class="card-content">
-            <v-btn @click="get4a"> GET ANSWER </v-btn>
+            <v-btn class="ml-3 align-self-center mb-3" @click="get4a"> GET ANSWER </v-btn>
           </div>
       </v-card>
       <v-card class="card">
           <v-card-title>ข้อ 4 - b</v-card-title>
           <div class="card-content">
-            <v-btn @click="get4b"> GET ANSWER </v-btn>
+            <v-btn class="ml-3 align-self-center mb-3" @click="get4b"> GET ANSWER </v-btn>
           </div>
       </v-card>
       <v-card class="card">
           <v-card-title>ข้อ 4 - c</v-card-title>
           <div class="card-content">
-            <v-btn @click="get4c" > GET ANSWER </v-btn>
-            <v-text-field v-model="country"></v-text-field>
+            <v-btn class="ml-3 align-self-center mb-3" @click="get4c" > GET ANSWER </v-btn>
+            <p class="align-self-center">ใส่ประเทศ</p>
+            <v-text-field class="card-input" v-model="country4c"></v-text-field>
           </div>
       </v-card>
       <v-card class="card">
           <v-card-title>ข้อ 4 - d</v-card-title>
           <div class="card-content">
-            <v-btn @click="get4d"> GET ANSWER </v-btn>
-            <v-text-field v-model="year"></v-text-field>
+            <v-btn class="ml-3 align-self-center mb-3" @click="get4d"> GET ANSWER </v-btn>
+            <p class="align-self-center pa-0">ใส่ปี : </p>
+            <v-text-field class="card-input" v-model="year4d"></v-text-field>
+            <p class="align-self-center pa-0">ใส่ color : </p>
+            <v-text-field class="card-input" v-model="color4d"></v-text-field>
           </div>
       </v-card>
 
-      <v-card class="card">
-        <v-card-title>ข้อ 5a</v-card-title>
+      <v-card class="card-map">
+        <v-card-title>ข้อ 5 - a</v-card-title>
+        <div class="card-content">
+            <v-btn class="ml-3 align-self-center mb-3" @click="get5a"> GET ANSWER </v-btn>
+            <p class="align-self-center pa-0">ใส่ปี : </p>
+            <v-text-field class="card-input" v-model="year5a"></v-text-field>
+        </div>
         <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data1" name="5a" />
       </v-card>
-      <v-card class="card">
-          <v-card-title>ข้อ 5b</v-card-title>
+      <v-card class="card-map">
+        <v-card-title>ข้อ 5 - b</v-card-title>
         <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data2" name="5b"  />
       </v-card> 
-      <v-card class="card"> 
-          <v-card-title>ข้อ 5c</v-card-title>
+      <v-card class="card-map"> 
+          <v-card-title>ข้อ 5 - c</v-card-title>
         <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data3" name="5c"  />
       </v-card> 
-      <v-card class="card"> 
-          <v-card-title>ข้อ 5d</v-card-title>
+      <v-card class="card-map"> 
+        <v-card-title>ข้อ 5 - d</v-card-title>
         <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data4" name="5d"  />
       </v-card> 
-      <v-card class="card"> 
-          <v-card-title>ข้อ 5e</v-card-title>
+      <v-card class="card-map"> 
+        <v-card-title>ข้อ 5 - e</v-card-title>
         <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data5" name="5e"  />
       </v-card> 
-      <v-card class="card"> 
-          <v-card-title>ข้อ 5f</v-card-title>
+      <v-card class="card-map"> 
+        <v-card-title>ข้อ 5 - f</v-card-title>
+        <div class="card-content">
+            <v-btn class="ml-3 align-self-center mb-3" @click="get5f"> GET ANSWER </v-btn>
+            <p class="align-self-center pa-0">ใส่ปี : </p>
+            <v-text-field class="card-input" v-model="year5f"></v-text-field>
+        </div>
         <WebMap msg="96cf806c32874026bef5f586315f098c" :info="data6" name="5f"  />
       </v-card>
   </v-container>
@@ -63,8 +77,11 @@ export default {
     },
 
     data: () => ({
-        country: 'Italy',
-        year: 2000,
+        country4c: 'Italy',
+        year4d: 2000,
+        color4d: 'red',
+        year5a: '2016',
+        year5f: '2016',
 	}),
 
     created(){
@@ -106,15 +123,14 @@ export default {
             this.$store.dispatch('get4b')
         },
         get4c(){
-            this.$store.dispatch('get4c', {country: this.country})
+            this.$store.dispatch('get4c', {country: this.country4c})
             },
         get4d(){
-            this.$store.dispatch('get4d', {year: this.year})
+            this.$store.dispatch('get4d', {year: this.year4d, color: this.color4d})
         },
 
-        // Start Call 
         get5a(){
-            this.$store.dispatch('get5a', {year: 2016})
+            this.$store.dispatch('get5a', {year: this.year5a})
         },
         get5b(){
             this.$store.dispatch('get5b')
@@ -129,7 +145,7 @@ export default {
             this.$store.dispatch('get5e')
         },
         get5f(){
-            this.$store.dispatch('get5f', {year: 2016})
+            this.$store.dispatch('get5f', {year: this.year5f})
         },
     },
 }
@@ -142,10 +158,29 @@ export default {
     align-items: center;
     gap: 10px
 }
+p{
+    margin: 0 1rem;
+    padding: 0;
+}
 .card{
     padding: 0.5rem;
     width: 1000px;
-    height: 500px;
+    overflow: hidden;
+}
+.card-map{
+    padding: 0.5rem;
+    width: 1000px;
+    height: 1000px;
+}
+.card-content{
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+}
+.card-input{
+    margin-left: 0 1rem;
+    padding: 0 1rem;
+    width: 30%;
 }
 
 </style>

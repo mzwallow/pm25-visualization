@@ -11,6 +11,11 @@
 .map-view {
 	height: 100%;
 	width: 100%;
+	padding: 10px;
+	position: relative;
+}
+canvas {
+  object-fit: cover;
 }
 </style>
 
@@ -20,12 +25,8 @@ import MapView from "@arcgis/core/views/MapView";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Graphic from "@arcgis/core/Graphic";
 import Multipoint from "@arcgis/core/geometry/Multipoint";
-import Geometry from "@arcgis/core/geometry/Geometry";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference";
-import TileInfo from "@arcgis/core/layers/support/TileInfo";
-import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils";
-import * as projection from "@arcgis/core/geometry/projection";
-import { geographicToWebMercator } from '@arcgis/core/geometry/support/webMercatorUtils';
+import { geographicToWebMercator } from "@arcgis/core/geometry/support/webMercatorUtils";
 
 export default {
 	name: "WebMap",
@@ -37,7 +38,7 @@ export default {
 	computed: {
 		data() {
 			let map, view, graphicsLayer, simpleMarkerSymbol, pointGraphic;
-
+			// console.log(this.name,this.info)
 			if (!this.info) {
 				return;
 			}
@@ -46,15 +47,8 @@ export default {
 				basemap: "topo-vector",
 			});
 
+			
 
-			simpleMarkerSymbol = {
-				type: "simple-marker",
-				color: [226, 119, 40], // Orange
-				outline: {
-					color: [255, 255, 255], // White
-					width: 1,
-				},
-			};
 			view = new MapView({
 				map,
 				// extent: {
@@ -64,45 +58,64 @@ export default {
 				// 	ymax: 34.3638389963474,
 				// 	spatialReference: 4326,
 				// },
-				extent: {
-					xmin: -9177882,
-					ymin: 4246761,
-					xmax: -9176720,
-					ymax: 4247967,
-					spatialReference: SpatialReference.WebMercator,
-				},
+				// extent: {
+				// 	xmin: -9177882,
+				// 	ymin: 4246761,
+				// 	xmax: -9176720,
+				// 	ymax: 4247967,
+				// 	spatialReference: new SpatialReference({
+				// 		wkid: 4326,
+				// 	}),
+				// },
 				spatialReference: SpatialReference.WebMercator,
-				zoom: 2,
-				constraints: {
-					lods: TileInfo.create({
-						// create the LODs to match the spatial reference of the view
-						spatialReference: SpatialReference.WGS84,
-					}).lods,
-				},
 				container: this.name,
-				center: [this.info[0][0], this.info[0][1]],
-				zoom: 11,
+				center: [this.info.point[0][0], this.info.point[0][1]],
+				zoom: 2,
 			});
 			graphicsLayer = new GraphicsLayer();
 			map.add(graphicsLayer);
 
+			
+			// this.info.point.forEach((item, index) => {
+			// 	let geom = new Point({
+			// 		x: item[0],
+			// 		y: item[1],
+			// 		type: "point",
+			// 		SpatialReference: SpatialReference.WGS84,
+			// 	})
+			// 	simpleMarkerSymbol = {
+			// 		type: "text",
+			// 		text: this.info.city[index],
+			// 		color: 'black', // Orange
+			// 		outline: {
+			// 			color: [255, 255, 255], // White
+			// 			width: 1,
+			// 		},
+			// 	};
+			// 	let newGeometry = geographicToWebMercator(geom);
+			// 	pointGraphic = new Graphic({
+			// 		geometry: newGeometry,
+			// 		symbol: simpleMarkerSymbol,
+			// 	});
+			// 	graphicsLayer.add(pointGraphic)
+			// });
+
+			simpleMarkerSymbol = {
+				type: "simple-marker",
+				color: [226, 119, 40], // Orange
+				outline: {
+					color: [255, 255, 255], // White
+					width: 1,
+				},
+			};
+
 			let geometry = new Multipoint({
-				points: this.info,
+				points: this.info.point,
 				type: "Multipoint",
-				SpatialReference: {
-					wkid: 4326
-				}
+				SpatialReference: SpatialReference.WGS84,
 			});
-
-			console.log('x', geometry)
-			let projectedPoints = projection.project(geometry, SpatialReference.WebMercator);
-			console.log('y',projectedPoints)
-			let canProjectWGS84toWebMercator = webMercatorUtils.canProject(SpatialReference.WGS84, SpatialReference.WebMercator);
-			console.log(canProjectWGS84toWebMercator)
-			let newGeometry = geographicToWebMercator(geometry)
-			console.log('z',newGeometry)
-
-			// geometry = projection.project(geometry, SpatialReference.WGS84)
+			
+			let newGeometry = geographicToWebMercator(geometry);
 
 			pointGraphic = new Graphic({
 				geometry: newGeometry,
@@ -110,6 +123,7 @@ export default {
 			});
 
 			graphicsLayer.add(pointGraphic);
+
 			view.when(() => {
 				console.log("moo");
 			});
