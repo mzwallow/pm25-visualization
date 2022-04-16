@@ -1,6 +1,7 @@
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
+const cors = require('cors');
 const sql = require('mssql');
 const XLSX = require('xlsx');
 
@@ -13,6 +14,7 @@ const HOST = '0.0.0.0';
 app.set('views', 'views');
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')))
+app.use(cors());
 
 const config = {
     server: process.env['DB_SERVER'],
@@ -25,6 +27,7 @@ const config = {
     }
 }
 
+// 4-A
 // List country and city names whose PM 2.5 values are greater than 50 in 2015
 app.get('/countries-PM25-gte-50-in-2015.xlsx', async (req, res) => {
     sql.connect(config, (err) => {
@@ -60,6 +63,7 @@ app.get('/countries-PM25-gte-50-in-2015.xlsx', async (req, res) => {
     })
 });
 
+// 4-B
 // List average PM 2.5 by country (decreasing order)
 app.get('/avg-pm25-by-countries-desc.xlsx', async (req, res) => {
     sql.connect(config, (err) => {
@@ -96,6 +100,7 @@ app.get('/avg-pm25-by-countries-desc.xlsx', async (req, res) => {
     })
 });
 
+// 4-C
 // List historical PM 2.5 values in given 'country' by year
 app.get('/:country/historical-pm25-by-year.xlsx', async (req, res) => {
     sql.connect(config, (err) => {
@@ -132,6 +137,7 @@ app.get('/:country/historical-pm25-by-year.xlsx', async (req, res) => {
     })
 });
 
+// 4-D
 // Total of the affected population (in number) from given 'year' and 'color_pm25'
 app.get('/:year/:color/total-affected-populations', async (req, res) => {
     sql.connect(config, (err) => {
@@ -169,6 +175,7 @@ app.get('/:year/:color/total-affected-populations', async (req, res) => {
     })
 });
 
+// 5-A
 // List all the city points of all countries by given 'year'
 app.get('/city-points-of-all-countries/:year', async (req, res) => {
     sql.connect(config, (err) => {
@@ -180,7 +187,7 @@ app.get('/city-points-of-all-countries/:year', async (req, res) => {
         }
 
         new sql.Request().query(`
-            SELECT country, city, Year, Geom
+            SELECT latitude, longtitude, country, city, Year, Geom
             FROM SpatialDB.dbo.AirPollution
             WHERE YEAR = ${req.params['year']}
         `, (err, result) => {
@@ -193,6 +200,7 @@ app.get('/city-points-of-all-countries/:year', async (req, res) => {
     })
 });
 
+// 5-B
 // List the 50 closest city points to Bangkok
 app.get('/50-city-points-closest-to-bangkok', async (req, res) => {
     sql.connect(config, (err) => {
@@ -210,7 +218,7 @@ app.get('/50-city-points-closest-to-bangkok', async (req, res) => {
             FROM SpatialDB.dbo.AirPollution
             WHERE city = 'Bangkok';
 
-            SELECT TOP 50 city, Geom.MakeValid().STDistance(@Pol) AS Distance, Geom
+            SELECT TOP 50 latitude, longtitude, city, Geom.MakeValid().STDistance(@Pol) AS Distance, Geom
             FROM SpatialDB.dbo.AirPollution
             ORDER BY Distance ASC;
         `, (err, result) => {
@@ -223,6 +231,7 @@ app.get('/50-city-points-closest-to-bangkok', async (req, res) => {
     })
 });
 
+// 5-C
 // List all the city points of Thailand’s neighboring countries in 2018
 app.get('/city-points-of-thailand-neighbors-in-2018', async (req, res) => {
     sql.connect(config, (err) => {
@@ -234,7 +243,7 @@ app.get('/city-points-of-thailand-neighbors-in-2018', async (req, res) => {
         }
 
         new sql.Request().query(`
-            SELECT country, year, Geom
+            SELECT latitude, longtitude, country, year, Geom
             FROM SpatialDB.dbo.AirPollution
             WHERE country IN ('Cambodia', 'Laos','Myanmar','Malaysia') AND Year = 2018
         `, (err, result) => {
@@ -247,8 +256,9 @@ app.get('/city-points-of-thailand-neighbors-in-2018', async (req, res) => {
     })
 });
 
+// 5-D
 // List the 4 points of MBR covering all city points in Thailand in 2009
-app.get('/4-points-of-mbr-covering-city-points-in-thailand-in-2018', async (req, res) => {
+app.get('/4-points-of-mbr-covering-city-points-in-thailand-in-2009', async (req, res) => {
     sql.connect(config, (err) => {
         if (err) {
             return res.status(500).json({
@@ -287,8 +297,9 @@ app.get('/4-points-of-mbr-covering-city-points-in-thailand-in-2018', async (req,
     })
 });
 
+// 5-E
 // List all city points of countries having the highest no. of city points in 2011
-app.get('/city-points-of-countries-having-highest-city-points-in-2018', async (req, res) => {
+app.get('/city-points-of-countries-having-highest-city-points-in-2011', async (req, res) => {
     sql.connect(config, (err) => {
         if (err) {
             return res.status(500).json({
@@ -298,7 +309,7 @@ app.get('/city-points-of-countries-having-highest-city-points-in-2018', async (r
         }
 
         new sql.Request().query(`
-            SELECT country, city , Year, geom
+            SELECT latitude, longtitude, country, city , Year, geom
             FROM SpatialDB.dbo.AirPollution
             WHERE country = (SELECT TOP 1 country
                 FROM SpatialDB.dbo.AirPollution
@@ -315,6 +326,7 @@ app.get('/city-points-of-countries-having-highest-city-points-in-2018', async (r
     })
 });
 
+// 5-F
 // List all the city points which are considered as “low income” by given 'year'
 app.get('/city-points-have-low-income/:year', async (req, res) => {
     sql.connect(config, (err) => {
@@ -326,7 +338,7 @@ app.get('/city-points-have-low-income/:year', async (req, res) => {
         }
 
         new sql.Request().query(`
-            SELECT city , Year, wbinc16_text, geom
+            SELECT latitude, longtitude, city, Year, wbinc16_text, geom
             FROM SpatialDB.dbo.AirPollution
             WHERE Year = ${req.params['year']} AND wbinc16_text = 'low income';
         `, (err, result) => {
