@@ -130,7 +130,7 @@ app.post('/air-pollution/upload', upload.single('file'), (req, res) => {
                             });
                         }
 
-                        return res.json({ message: 'success' });
+                        // return res.json({ message: 'success' });
                     });
                 });
             }
@@ -170,6 +170,9 @@ app.delete('/air-pollution', (req, res) => {
             TRUNCATE TABLE SpatialDB.dbo.AirPollution;
         `, (err) => {
             if (err) return res.status(500).json({ error: err.message });
+
+            progress = 0;
+            dataLength = 0;
 
             return res.json({ message: 'success' });
         });
