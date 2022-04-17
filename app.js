@@ -32,10 +32,10 @@ const config = {
         trustServerCertificate: true // change to true for local dev / self-signed certs
     }
 }
-
+//####################################   Step 2   ####################################\\
 let progress = 0, dataLength = 0;
 
-// 2
+// Step: 2)
 // Upload file to insert into database
 app.post('/air-pollution/upload', upload.single('file'), (req, res) => {
     let i = 0, airPollutionData = [];
@@ -142,6 +142,7 @@ app.post('/air-pollution/upload', upload.single('file'), (req, res) => {
     });
 });
 
+// Get running process
 app.get('/air-pollution/process', (req, res) => {
     if (progress === dataLength && dataLength !== 0) {
         return res.json({ message: `Success ${progress} of ${dataLength}` });
@@ -151,6 +152,7 @@ app.get('/air-pollution/process', (req, res) => {
     return res.json({ message: `Uploading ${progress} of ${dataLength}` });
 });
 
+// Get log file of failed query
 app.get('/air-pollution/error.log', (req, res) => {
     if (progress === dataLength && dataLength != 0)
         return res.sendFile(path.join(__dirname, 'debug/error.log'))
@@ -158,6 +160,7 @@ app.get('/air-pollution/error.log', (req, res) => {
         .json({ message: 'process has not finished yet or upload air pollution data first' });
 });
 
+// Delete data in AirPolluation Table
 app.delete('/air-pollution', (req, res) => {
     sql.connect(config, (err) => {
         if (err) {
@@ -177,7 +180,10 @@ app.delete('/air-pollution', (req, res) => {
     })
 });
 
-// 4-A
+//################################   End of Step 2   ################################\\
+
+//####################################   Step 4   ####################################\\
+// Step: 4-A)
 // List country and city names whose PM 2.5 values are greater than 50 in 2015
 app.get('/countries-PM25-gte-50-in-2015.xlsx', async (req, res) => {
     sql.connect(config, (err) => {
@@ -213,7 +219,7 @@ app.get('/countries-PM25-gte-50-in-2015.xlsx', async (req, res) => {
     })
 });
 
-// 4-B
+// Step: 4-B)
 // List average PM 2.5 by country (decreasing order)
 app.get('/avg-pm25-by-countries-desc.xlsx', async (req, res) => {
     sql.connect(config, (err) => {
@@ -250,7 +256,7 @@ app.get('/avg-pm25-by-countries-desc.xlsx', async (req, res) => {
     })
 });
 
-// 4-C
+// Step: 4-C)
 // List historical PM 2.5 values in given 'country' by year
 app.get('/:country/historical-pm25-by-year.xlsx', async (req, res) => {
     sql.connect(config, (err) => {
@@ -287,7 +293,7 @@ app.get('/:country/historical-pm25-by-year.xlsx', async (req, res) => {
     })
 });
 
-// 4-D
+// Step: 4-D)
 // Total of the affected population (in number) from given 'year' and 'color_pm25'
 app.get('/:year/:color/total-affected-populations.xlsx', async (req, res) => {
     sql.connect(config, (err) => {
@@ -324,8 +330,10 @@ app.get('/:year/:color/total-affected-populations.xlsx', async (req, res) => {
         });
     })
 });
+//################################   End of Step 4   ################################\\
 
-// 5-A
+//####################################   Step 5   ####################################\\
+// Step: 5-A)
 // List all the city points of all countries by given 'year'
 app.get('/city-points-of-all-countries/:year', async (req, res) => {
     sql.connect(config, (err) => {
@@ -350,7 +358,7 @@ app.get('/city-points-of-all-countries/:year', async (req, res) => {
     })
 });
 
-// 5-B
+// Step: 5-B)
 // List the 50 closest city points to Bangkok
 app.get('/50-city-points-closest-to-bangkok', async (req, res) => {
     sql.connect(config, (err) => {
@@ -381,7 +389,7 @@ app.get('/50-city-points-closest-to-bangkok', async (req, res) => {
     })
 });
 
-// 5-C
+// Step: 5-C)
 // List all the city points of Thailand’s neighboring countries in 2018
 app.get('/city-points-of-thailand-neighbors-in-2018', async (req, res) => {
     sql.connect(config, (err) => {
@@ -406,7 +414,7 @@ app.get('/city-points-of-thailand-neighbors-in-2018', async (req, res) => {
     })
 });
 
-// 5-D
+// Step: 5-D)
 // List the 4 points of MBR covering all city points in Thailand in 2009
 app.get('/4-points-of-mbr-covering-city-points-in-thailand-in-2009', async (req, res) => {
     sql.connect(config, async (err) => {
@@ -435,7 +443,7 @@ app.get('/4-points-of-mbr-covering-city-points-in-thailand-in-2009', async (req,
     });
 });
 
-// 5-E
+// Step: 5-E)
 // List all city points of countries having the highest no. of city points in 2011
 app.get('/city-points-of-countries-having-highest-city-points-in-2011', async (req, res) => {
     sql.connect(config, (err) => {
@@ -464,7 +472,7 @@ app.get('/city-points-of-countries-having-highest-city-points-in-2011', async (r
     })
 });
 
-// 5-F
+// Step: 5-F)
 // List all the city points which are considered as “low income” by given 'year'
 app.get('/city-points-have-low-income/:year', async (req, res) => {
     sql.connect(config, (err) => {
@@ -488,6 +496,7 @@ app.get('/city-points-have-low-income/:year', async (req, res) => {
         });
     })
 });
+//################################   End of Step 5   ################################\\
 
 app.listen(PORT, () => {
     console.log(`Running on http://${HOST}:${PORT}`);
