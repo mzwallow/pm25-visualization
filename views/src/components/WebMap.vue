@@ -98,9 +98,7 @@ export default {
 					SpatialReference: SpatialReference.WGS84,
 				});
 
-				console.log(1,this.name, geometry)
 				let newGeometry = geographicToWebMercator(geometry);
-				console.log(2,this.name, newGeometry)
 
 				pointGraphic = new Graphic({
 					geometry: newGeometry,
