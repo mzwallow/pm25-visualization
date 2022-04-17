@@ -16,9 +16,6 @@ const upload = multer({ dest: 'files/' });
 const PORT = 3000;
 const HOST = '0.0.0.0';
 
-app.set('views', 'views');
-app.set('view engine', 'ejs');
-app.use(express.static(path.join(__dirname, 'public')))
 app.use(cors());
 
 const config = {
