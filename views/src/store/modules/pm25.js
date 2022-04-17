@@ -181,7 +181,6 @@ const actions = {
 			.get(`/4-points-of-mbr-covering-city-points-in-thailand-in-2009`)
 			.then((res) => {
 				let point
-				console.log()
 				if(res.data[0][""] !== null){
 					point = res.data[0][""].points.map((item) => {
 						return [item.x, item.y];
