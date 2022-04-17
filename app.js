@@ -2,11 +2,17 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
-const sql = require('mssql');
+const multer = require('multer')
 const XLSX = require('xlsx');
+const sql = require('mssql');
+const Queue = require('bull');
+const winston = require('winston');
 
 const app = express();
 const routes = require('./routes/router');
+const { format } = require('winston');
+
+const upload = multer({ dest: 'files/' });
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
@@ -27,23 +33,148 @@ const config = {
     }
 }
 
-/**
- * TODO: Given an input path to the input excel file. The output of this step is two-folded:
- * TODO: the successful insertion of data rows into the table as well as the log file reporting data rows failed to be inserted.
-*/
+let progress = 0, dataLength = 0;
+
 // 2
 // 
-app.post('/upload-air-pollution', async (req, res) => {
+app.post('/air-pollution/upload', upload.single('file'), (req, res) => {
+    let i = 0, airPollutionData = [];
+
+    const workbook = XLSX.readFile(req.file.path)
+    workbook.SheetNames.forEach((sheetName) => {
+        if (i === 0) airPollutionData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+        i++;
+    });
+
+    sql.connect(config, async (err) => {
+        if (err) {
+            return res.status(500).json({
+                message: 'can not connect to database',
+                error: err.message
+            });
+        }
+
+        const insertQueue = new Queue(
+            'insert air pollution',
+            `redis://${process.env['REDIS_HOST']}:${process.env['REDIS_PORT']}`
+        )
+
+        insertQueue.empty()
+
+        const promises = airPollutionData.map((row) => {
+            insertQueue.add(row);
+        });
+
+        await Promise.all(promises);
+
+        progress = 0;
+        dataLength = airPollutionData.length;
+
+        const logger = winston.createLogger({
+            level: 'info',
+            format: format.combine(
+                format.timestamp({
+                    format: 'YYYY-MM-DD HH:mm:ss'
+                }),
+                format.errors({ stack: true }),
+                format.splat(),
+                format.json()
+            ),
+            transports: [
+                new winston.transports.File({
+                    filename: './debug/error.log',
+                    options: { flags: 'w' }
+                }),
+            ]
+        });
+
+        insertQueue.process((job) => {
+            const request = new sql.Request();
+            request.input('country', sql.NVarChar, job.data['country']);
+            request.input('city', sql.NVarChar, job.data['city']);
+            request.input('year', sql.Int, job.data['Year']);
+            request.input('pm25', sql.Float, job.data['pm25']);
+            request.input('latitude', sql.Float, job.data['latitude']);
+            request.input('longtitude', sql.Float, job.data['longtitude']);
+            request.input('population', sql.BigInt, job.data['population']);
+            request.input('wbinc16Text', sql.NVarChar, job.data['wbinc16_text']);
+            request.input('region', sql.NVarChar, job.data['Region']);
+            request.input('concPm25', sql.NVarChar, job.data['conc_pm25']);
+            request.input('colorPm25', sql.NVarChar, job.data['color_pm25']);
+            request.execute('SpatialDB.dbo.InsertAirPollution', (err) => {
+                if (err) {
+                    logger.info({
+                        message: err.message,
+                        data: job.data,
+                    });
+                }
+            });
+        });
+
+        insertQueue.on('completed', (job, result) => {
+            progress++;
+
+            if (progress === dataLength && dataLength != 0) {
+                sql.connect(config, (err) => {
+                    if (err) {
+                        return res.status(500).json({
+                            message: 'can not connect to database',
+                            error: err.message
+                        });
+                    }
+
+                    new sql.Request().query(`
+                        UPDATE [SpatialDB].[dbo].[AirPollution]
+                        SET Geom = geometry::STGeomFromText('POINT(' + convert(nvarchar(255), longtitude) + ' ' + convert(nvarchar(255), latitude) + ')', 4326);
+                    `, (err) => {
+                        if (err) {
+                            return res.status(500).json({
+                                message: 'update Geom failed',
+                                error: err.message
+                            });
+                        }
+
+                        return res.json({ message: 'success' });
+                    });
+                });
+            }
+        });
+    });
+});
+
+app.get('/air-pollution/process', (req, res) => {
+    if (progress === dataLength && dataLength !== 0) {
+        return res.json({ message: `Success ${progress} of ${dataLength}` });
+    } else if (dataLength === 0) {
+        return res.json({ message: 'upload air pollution data first' });
+    }
+    return res.json({ message: `Uploading ${progress} of ${dataLength}` });
+});
+
+app.get('/air-pollution/error.log', (req, res) => {
+    if (progress === dataLength && dataLength != 0)
+        return res.sendFile(path.join(__dirname, 'debug/error.log'))
+    return res.status(500)
+        .json({ message: 'process has not finished yet or upload air pollution data first' });
+});
+
+app.delete('/air-pollution', (req, res) => {
     sql.connect(config, (err) => {
         if (err) {
-     	    return res.status(500).json({
-	        message: 'can not connect to database',
-		error: err.message
-	    });
-	}
+            return res.status(500).json({
+                message: 'can not connect to database',
+                error: err.message
+            });
+        }
 
-	new sql.Request().query(``);
-    });
+        new sql.Request().query(`
+            TRUNCATE TABLE SpatialDB.dbo.AirPollution;
+        `, (err) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            return res.json({ message: 'success' });
+        });
+    })
 });
 
 // 4-A
@@ -158,7 +289,7 @@ app.get('/:country/historical-pm25-by-year.xlsx', async (req, res) => {
 
 // 4-D
 // Total of the affected population (in number) from given 'year' and 'color_pm25'
-app.get('/:year/:color/total-affected-populations', async (req, res) => {
+app.get('/:year/:color/total-affected-populations.xlsx', async (req, res) => {
     sql.connect(config, (err) => {
         if (err) {
             return res.status(500).json({
@@ -214,7 +345,7 @@ app.get('/city-points-of-all-countries/:year', async (req, res) => {
                 return res.status(500).json({ error: err.message });
             }
 
-            res.json(result.recordset);            
+            res.json(result.recordset);
         });
     })
 });
@@ -245,7 +376,7 @@ app.get('/50-city-points-closest-to-bangkok', async (req, res) => {
                 return res.status(500).json({ error: err.message });
             }
 
-            res.json(result.recordset);            
+            res.json(result.recordset);
         });
     })
 });
@@ -262,7 +393,7 @@ app.get('/city-points-of-thailand-neighbors-in-2018', async (req, res) => {
         }
 
         new sql.Request().query(`
-            SELECT latitude, longtitude, country, year, Geom
+            SELECT latitude, longtitude, country, Year, Geom
             FROM SpatialDB.dbo.AirPollution
             WHERE country IN ('Cambodia', 'Laos','Myanmar','Malaysia') AND Year = 2018
         `, (err, result) => {
@@ -270,7 +401,7 @@ app.get('/city-points-of-thailand-neighbors-in-2018', async (req, res) => {
                 return res.status(500).json({ error: err.message });
             }
 
-            res.json(result.recordset);            
+            res.json(result.recordset);
         });
     })
 });
@@ -278,42 +409,30 @@ app.get('/city-points-of-thailand-neighbors-in-2018', async (req, res) => {
 // 5-D
 // List the 4 points of MBR covering all city points in Thailand in 2009
 app.get('/4-points-of-mbr-covering-city-points-in-thailand-in-2009', async (req, res) => {
-    sql.connect(config, (err) => {
+    sql.connect(config, async (err) => {
         if (err) {
             return res.status(500).json({
                 message: 'can not connect to database',
-                error: err
+                error: err.message
             });
         }
 
-        new sql.Request().query(`
-            SELECT TOP 1 latitude,longtitude, geom
-            FROM SpatialDB.dbo.AirPollution
-            WHERE country = 'Thailand' AND Year = 2014
-            ORDER BY latitude ASC;
-            
-            SELECT TOP 1 latitude,longtitude, geom
-            FROM SpatialDB.dbo.AirPollution
-            WHERE country = 'Thailand' AND Year = 2014
-            ORDER BY latitude DESC;
-            
-            SELECT TOP 1 longtitude, latitude, geom
-            FROM SpatialDB.dbo.AirPollution
-            WHERE country = 'Thailand' AND Year = 2014
-            ORDER BY longtitude ASC;
-            
-            SELECT TOP 1 longtitude, latitude, geom
-            FROM SpatialDB.dbo.AirPollution
-            WHERE country = 'Thailand' AND Year = 2014
-            ORDER BY longtitude DESC;
-        `, (err, result) => {
-            if (err) {
-                return res.status(500).json({ error: err.message });
-            }
 
-            res.json(result.recordset);            
+        const request = new sql.Request()
+
+        request.query(`
+            DECLARE @TH geometry
+            SELECT @TH=geometry::EnvelopeAggregate(Geom)
+            FROM SpatialDB.dbo.AirPollution
+            WHERE country='Thailand' AND Year=2016
+        
+            SELECT @TH.STEnvelope()
+        `, (err, result) => {
+            if (err) return res.status(500).json({ error: err.message });
+
+            return res.json(result.recordset);
         });
-    })
+    });
 });
 
 // 5-E
@@ -328,7 +447,7 @@ app.get('/city-points-of-countries-having-highest-city-points-in-2011', async (r
         }
 
         new sql.Request().query(`
-            SELECT latitude, longtitude, country, city , Year, geom
+            SELECT latitude, longtitude, country, city , Year, Geom
             FROM SpatialDB.dbo.AirPollution
             WHERE country = (SELECT TOP 1 country
                 FROM SpatialDB.dbo.AirPollution
@@ -340,7 +459,7 @@ app.get('/city-points-of-countries-having-highest-city-points-in-2011', async (r
                 return res.status(500).json({ error: err.message });
 
             }
-            res.json(result.recordset);            
+            res.json(result.recordset);
         });
     })
 });
@@ -357,7 +476,7 @@ app.get('/city-points-have-low-income/:year', async (req, res) => {
         }
 
         new sql.Request().query(`
-            SELECT latitude, longtitude, city, Year, wbinc16_text, geom
+            SELECT latitude, longtitude, city, Year, wbinc16_text, Geom
             FROM SpatialDB.dbo.AirPollution
             WHERE Year = ${req.params['year']} AND wbinc16_text = 'low income';
         `, (err, result) => {
@@ -365,7 +484,7 @@ app.get('/city-points-have-low-income/:year', async (req, res) => {
                 return res.status(500).json({ error: err.message });
             }
 
-            res.json(result.recordset);            
+            res.json(result.recordset);
         });
     })
 });
