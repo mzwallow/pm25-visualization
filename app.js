@@ -36,7 +36,7 @@ const config = {
 let progress = 0, dataLength = 0;
 
 // 2
-// 
+// Upload file to insert into database
 app.post('/air-pollution/upload', upload.single('file'), (req, res) => {
     let i = 0, airPollutionData = [];
 
@@ -95,7 +95,7 @@ app.post('/air-pollution/upload', upload.single('file'), (req, res) => {
             request.input('year', sql.Int, job.data['Year']);
             request.input('pm25', sql.Float, job.data['pm25']);
             request.input('latitude', sql.Float, job.data['latitude']);
-            request.input('longtitude', sql.Float, job.data['longtitude']);
+            request.input('longtitude', sql.Float, job.data['longitude'] ? job.data['longitude'] : job.data['longtitude']);
             request.input('population', sql.BigInt, job.data['population']);
             request.input('wbinc16Text', sql.NVarChar, job.data['wbinc16_text']);
             request.input('region', sql.NVarChar, job.data['Region']);
