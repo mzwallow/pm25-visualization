@@ -9,7 +9,6 @@ const Queue = require('bull');
 const winston = require('winston');
 
 const app = express();
-const routes = require('./routes/router');
 const { format } = require('winston');
 
 const upload = multer({ dest: 'files/' });
